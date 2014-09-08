@@ -25,18 +25,16 @@ end
 -- returns number of jobs done 
 function sched.check(dt)
 	sched.ctime = sched.ctime + dt
-	local done = {}
+
 	for i,v in pairs(sched.jobs) do 
 		local ct = sched.time()
 		if ct > v.exetime then 
-			table.insert(done, i)
 			v.func(unpack(v.args or {}))
+			sched.jobs[i] = nil
 		end 
 	end 
-	for i,v in pairs(done) do 
-		table.remove(sched.jobs, i)
-	end 
-	return #done
+
+	
 end 
 
 

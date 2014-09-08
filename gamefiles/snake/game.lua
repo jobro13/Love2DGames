@@ -15,6 +15,17 @@ game.PowerUpTimer = 0
 game.PowerUpTimeMin = 2
 game.PowerUpTimeMax = 4 
 
+game.quitkey = "escape"
+
+function game:setmsg(msg)
+	self.msg = msg 
+	scheduler.add(2, 
+		function()
+			if self.msg == msg then 
+				self.msg = nil 
+			end 
+		end)
+end 
 
 
 function game:getgridbounds()
@@ -104,7 +115,14 @@ function game:new()
 		a = "left"}, 
 		{255,0,0})
 
-	o.snakes[2].speed= 30
+	--[[o:addsnake("oranje slang", 
+		{i ="up",
+		j = "left",
+		k = "down",
+		l = "right"},
+		{255,130,130})--]]
+
+	--o.snakes[2].speed= 30
 
 
 	o.gridsize = o.snakes[1].size
@@ -146,16 +164,17 @@ function game:update(dt)
 			v:update(dt)
 			local hpos = v.pdata[1]
 			local max_x, max_y = self:getgridbounds(max_x, max_y)
-			if hpos[1] > max_x or hpos[1] < 0 or hpos[2] > max_y or hpos[2] < 0 then 
+		--[[	if hpos[1] > max_x or hpos[1] < 0 or hpos[2] > max_y or hpos[2] < 0 then 
 				v:remove()
-			end 
+			end--]] 
 		end 
 		for i,v in pairs(self.grid.CS) do 	
 			local data = self.grid[v[1]][v[2]]
-			print("CS", v[1], v[2], #data)
+			--print("CS", v[1], v[2], #data)
 			if #data > 1 then
 				local snakes = {}
 				local tile
+				local bomb 
 				for i,v in pairs(data) do 
 					if v.class == "snake" then 
 						table.insert(snakes,v)
@@ -163,7 +182,9 @@ function game:update(dt)
 					elseif v.class == "tile" then 
 						tile = v
 						print('tile')
-					end
+					elseif v.class == "bomb" then 
+						bomb = v 
+					end 
 				end 
 				if #snakes >= 2 then 
 					for i = 2, #snakes do 
@@ -173,8 +194,10 @@ function game:update(dt)
 					if tile then 
 						tile:touch(snakes[1])
 					end 
-				elseif tile then 
+				elseif tile and #snakes >= 1 then 
 					tile:touch(snakes[1])
+				elseif bomb and #snakes == 1 then 
+					snakes[1]:remove() 
 				end
 
 				
@@ -212,11 +235,15 @@ function game:update(dt)
 			self.RequestNewStart = true 
 		end 
 	end 
-	love.graphics.setCanvas()
 	scheduler.check(dt)
+	love.graphics.setCanvas()
+	
 end
 
 function game:keydown(key)
+	if key == self.quitkey then 
+		love.event.quit()
+	end 
 	if not self.Started then 
 		self.Started = true 
 	else

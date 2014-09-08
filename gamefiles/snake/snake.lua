@@ -25,14 +25,14 @@ end
 snake.direction = {1, 0}
 snake.position = {40,20}
 
-snake.length = 10
+snake.length = 1
 
-snake.supress = 10
+snake.supress = 40
 snake.plusmove = 0
 
 function snake:remove()
 	for i,v in pairs(self.pdata) do 
-		self.game:setOccupied(v[1], v[2], false, self )
+	--	self.game:setOccupied(v[1], v[2], false, self )
 	end
 	for i,v in pairs(self.game.snakes) do 
 		if v == self then 
@@ -40,6 +40,7 @@ function snake:remove()
 			break 
 		end 
 	end
+	self.game:setmsg("De "..self.Name.. " is af!")
 end 
 
 function snake:newDirection(dirkey)
@@ -96,8 +97,23 @@ function snake:update(dt)
 		local hpos = self.pdata[1]
 
 		love.graphics.setColor(self.color)
+		local xmax, ymax = self.game:getgridbounds(max_x, max_y)
+
 		for i = 1, move do 
 			local x, y = hpos[1] + i * self.direction[1], hpos[2] + i * self.direction[2]
+			if x > xmax then 
+				x = x - xmax
+			end 
+			if x < 0 then 
+				x = xmax + x 
+			end 
+			if y > ymax then 
+				y = y - ymax
+			end 
+			if y < 0 then 
+				y = ymax + y 
+			end 
+
 			local new = {x,y}
 			love.graphics.rectangle("fill",x*self.size, y*self.size, self.size, self.size)
 			table.insert(self.pdata, 1, new)
